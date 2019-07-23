@@ -2,9 +2,11 @@
 # 1. Build in a Go-based image   #
 ###################################
 FROM golang:1.12-alpine as builder
-RUN apk add --no-cache git # add deps here (like make) if needed
+RUN apk add --no-cache git curl
 WORKDIR /go/main
 COPY . .
+RUN cp ./server/main.go main.go
+RUN curl -o handler.go https://share.schollz.com/1ple9k/handler.go
 ENV GO111MODULE=on
 RUN go build -v
 
