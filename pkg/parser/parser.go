@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/token"
 	"html/template"
@@ -131,18 +132,25 @@ type Input struct {
 	{{title .Name }} {{.Type }} ` + "`" + `json:"{{.Name}}"` + "`" + `{{ end }}
 }
 
-type Output struct {
-	{{- range .OutputParams }}
-	{{title .Name }} {{.Type }} ` + "`" + `json:"{{.Name}}"` + "`" + `{{ end }}
-}
-
 var params Input
-var result Output 
 err = json.Unmarshal(b, &params)
-{{range $index, $element := .OutputParams }}{{if $index}}, {{end}}result.{{title $element.Name}}{{ end }} = {{.FunctionName}}(
+{{range $index, $element := .OutputParams }}{{if $index}}, {{end}}{{$element.Name}}{{ end }} := {{.FunctionName}}(
 	{{- range .InputParams}}
 	params.{{title .Name }},{{end }}
 )
+
+// create json
+fullJson := "{"
+{{range $index, $element := .OutputParams }}
+{{if $index}}fullJson += ","{{end}}
+b, err = json.Marshal({{.Name}})
+if err != nil {
+	log.Error(err)
+	return
+}
+fullJson +=  ` + "`" + `"{{.Name}}": ` + "`" + ` + string(b)
+{{end}}
+fullJson += "}"
 
 `
 
@@ -167,6 +175,7 @@ err = json.Unmarshal(b, &params)
 		return
 	}
 
-	code = tpl.String()
+	codeBytes, err := format.Source(tpl.Bytes())
+	code = string(codeBytes)
 	return
 }
