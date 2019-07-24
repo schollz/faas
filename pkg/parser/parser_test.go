@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/schollz/faasss/pkg/models"
+	"github.com/schollz/faas/pkg/models"
 	log "github.com/schollz/logger"
 	"github.com/stretchr/testify/assert"
 )
