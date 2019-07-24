@@ -140,7 +140,7 @@ err = json.Unmarshal(b, &params)
 )
 
 // create json
-fullJson := "{"
+fullJson = "{"
 {{range $index, $element := .OutputParams }}
 {{if $index}}fullJson += ","{{end}}
 b, err = json.Marshal({{.Name}})
@@ -151,7 +151,6 @@ if err != nil {
 fullJson +=  ` + "`" + `"{{.Name}}": ` + "`" + ` + string(b)
 {{end}}
 fullJson += "}"
-
 `
 
 	type TemplateStruct struct {
