@@ -13,24 +13,25 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/schollz/faasss/pkg/models"
 	"github.com/schollz/faasss/pkg/utils"
 	log "github.com/schollz/logger"
 )
 
 var ErrorFunctionNotFound = errors.New("function not found")
 
-func FindFunction(gitURL string, functionName string) (structString string, err error) {
+func FindFunction(importPath string, functionName string) (structString string, err error) {
 	// create a temp directory
 	tempdir, err := ioutil.TempDir("", "parser")
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	log.Debugf("cloning %s into %s", gitURL, tempdir)
+	log.Debugf("cloning %s into %s", importPath, tempdir)
 	defer os.RemoveAll(tempdir)
 
 	// clone into temp directory
-	stdout, stderr, err := utils.RunCommand(fmt.Sprintf("git clone --depth 1 %s %s", gitURL, tempdir))
+	stdout, stderr, err := utils.RunCommand(fmt.Sprintf("git clone --depth 1 https://%s %s", importPath, tempdir))
 	log.Debugf("stdout: [%s]", stdout)
 	log.Debugf("stderr: [%s]", stderr)
 	if err != nil {
@@ -64,12 +65,7 @@ func FindFunction(gitURL string, functionName string) (structString string, err 
 	return
 }
 
-type Param struct {
-	Name string
-	Type string
-}
-
-func findFunctionInFile(fname string, functionName string) (packageName string, inputParams []Param, outputParams []Param, err error) {
+func findFunctionInFile(fname string, functionName string) (packageName string, inputParams []models.Param, outputParams []models.Param, err error) {
 	// read file
 	b, err := ioutil.ReadFile(fname)
 	if err != nil {
@@ -99,16 +95,16 @@ func findFunctionInFile(fname string, functionName string) (packageName string, 
 			}
 			// found function
 			err = nil
-			inputParams = make([]Param, len(fd.Type.Params.List))
+			inputParams = make([]models.Param, len(fd.Type.Params.List))
 			for i, param := range fd.Type.Params.List {
-				inputParams[i] = Param{
+				inputParams[i] = models.Param{
 					param.Names[0].Name,
 					src[param.Type.Pos()-offset : param.Type.End()-offset],
 				}
 			}
-			outputParams = make([]Param, len(fd.Type.Results.List))
+			outputParams = make([]models.Param, len(fd.Type.Results.List))
 			for i, param := range fd.Type.Results.List {
-				outputParams[i] = Param{
+				outputParams[i] = models.Param{
 					param.Names[0].Name,
 					src[param.Type.Pos()-offset : param.Type.End()-offset],
 				}
@@ -122,7 +118,7 @@ func findFunctionInFile(fname string, functionName string) (packageName string, 
 	return
 }
 
-func codeGeneration(packageName string, functionName string, inputParams []Param, outputParams []Param) (code string, err error) {
+func codeGeneration(packageName string, functionName string, inputParams []models.Param, outputParams []models.Param) (code string, err error) {
 
 	funcMap := template.FuncMap{
 		// The name "title" is what the function will be called in the template text.
@@ -152,8 +148,8 @@ err = json.Unmarshal(b, &params)
 
 	type TemplateStruct struct {
 		FunctionName string
-		InputParams  []Param
-		OutputParams []Param
+		InputParams  []models.Param
+		OutputParams []models.Param
 	}
 
 	tmpl, err := template.New("titleTest").Funcs(funcMap).Parse(templateText)
