@@ -36,7 +36,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		log.Infof("%s?%s %s", r.URL.Path, r.URL.RawQuery, time.Since(timeStart))
 	}()
 
-	response, err := handle(w, r)
+	var response []byte
+	var err error
+
+	if r.Method == "GET" {
+		response, err = handleGet(w, r)
+	} else if r.Method == "POST" {
+		response, err = handlePost(w, r)
+	}
 	if err != nil {
 		res := struct {
 			Message string `json:"message"`
@@ -68,7 +75,11 @@ type Input struct {
 
 // end generated code
 
-func handle(w http.ResponseWriter, r *http.Request) (response []byte, err error) {
+func handlePost(w http.ResponseWriter, r *http.Request) (response []byte, err error) {
+
+}
+
+func handleGet(w http.ResponseWriter, r *http.Request) (response []byte, err error) {
 	funcString, ok := r.URL.Query()["func"]
 	if !ok {
 		err = fmt.Errorf("no func string")
@@ -96,6 +107,10 @@ func handle(w http.ResponseWriter, r *http.Request) (response []byte, err error)
 		return
 	}
 
+	return getReponse(input)
+}
+
+func getReponse(input Input) (response []byte, err error) {
 	// start generated code
 	out1, out2 := ingredients.NewFromURL(input.Url)
 	var b []byte
