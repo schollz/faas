@@ -25,6 +25,13 @@ type Param struct {
 
 var ErrorFunctionNotFound = errors.New("function not found")
 
+// ParseFunctionString takes input like ParseFunctionString("x","y",`run(1,"hello")`)
+// and returns []byte(`{"x":1,"y":"hello"}`) which can later be used for unmarshalling
+func ParseFunctionString(paramNames []string, functionString string) (jsonBytes []byte) {
+
+	return
+}
+
 func FindFunction(importPath string, functionName string) (structString string, err error) {
 	// create a temp directory
 	tempdir, err := ioutil.TempDir("", "parser")
