@@ -77,5 +77,6 @@ func TestCodeGeneration(t *testing.T) {
 
 	code := tpl.String()
 	fmt.Println(code)
+	ioutil.WriteFile("test/1.go", []byte(code), 0644)
 	assert.Nil(t, nil)
 }
