@@ -34,7 +34,7 @@ type CodeGen struct {
 
 var ErrorFunctionNotFound = errors.New("function not found")
 
-func BuildAndRunContainer(importPath string, functionName string, containerName string) (err error) {
+func BuildContainerFromImportPath(importPath string, functionName string, containerName string) (err error) {
 	// create a temp directory
 	tempdir, err := ioutil.TempDir("", "build")
 	if err != nil {
@@ -59,7 +59,7 @@ func BuildAndRunContainer(importPath string, functionName string, containerName 
 	return
 }
 
-func BuildContainerFromImportpath(importPath string, functionName string, tempdir string) (err error) {
+func GenerateContainerFromImportpath(importPath string, functionName string, tempdir string) (err error) {
 	log.Debugf("building %s into %s", importPath, tempdir)
 
 	// build the template file
