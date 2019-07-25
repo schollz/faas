@@ -22,8 +22,9 @@ func TestFindFunctionInFile(t *testing.T) {
 }
 
 func TestParseFunctionString(t *testing.T) {
-	jsonBytes, err := ParseFunctionString([]string{"x", "y", "z"}, `run(1,"hello",[1.2,2.1])`)
+	functionName, jsonBytes, err := ParseFunctionString([]string{"x", "y", "z"}, `run(1,"hello",[1.2,2.1])`)
 	assert.Nil(t, err)
+	assert.Equal(t, "run", functionName)
 	assert.Equal(t, `{"x": 1, "y": "hello", "z": [1.2,2.1]}`, string(jsonBytes))
 }
 

@@ -28,14 +28,16 @@ var ErrorFunctionNotFound = errors.New("function not found")
 
 // ParseFunctionString takes input like ParseFunctionString("x","y","z"),`run(1,"hello",[1.2,2.1])`)
 // and returns []byte(`{"x":1,"y":"hello","z":[1.2,2.1]}`) which can later be used for unmarshalling
-func ParseFunctionString(paramNames []string, functionString string) (jsonBytes []byte, err error) {
+func ParseFunctionString(paramNames []string, functionString string) (functionName string, jsonBytes []byte, err error) {
 	if !strings.Contains(functionString, "(") {
 		err = fmt.Errorf("must contain ()")
 		log.Error(err)
 		return
 	}
 	// add brackets
-	functionString = strings.TrimSpace(strings.SplitN(functionString, "(", 2)[1])
+	foo := strings.SplitN(functionString, "(", 2)
+	functionName = strings.TrimSpace(foo[0])
+	functionString = strings.TrimSpace(foo[1])
 	functionString = "[" + functionString[:len(functionString)-1] + "]"
 
 	var values []interface{}
