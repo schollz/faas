@@ -2,6 +2,7 @@ package gofaas
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -25,10 +26,48 @@ type Param struct {
 
 var ErrorFunctionNotFound = errors.New("function not found")
 
-// ParseFunctionString takes input like ParseFunctionString("x","y",`run(1,"hello")`)
-// and returns []byte(`{"x":1,"y":"hello"}`) which can later be used for unmarshalling
-func ParseFunctionString(paramNames []string, functionString string) (jsonBytes []byte) {
+// ParseFunctionString takes input like ParseFunctionString("x","y","z"),`run(1,"hello",[1.2,2.1])`)
+// and returns []byte(`{"x":1,"y":"hello","z":[1.2,2.1]}`) which can later be used for unmarshalling
+func ParseFunctionString(paramNames []string, functionString string) (jsonBytes []byte, err error) {
+	if !strings.Contains(functionString, "(") {
+		err = fmt.Errorf("must contain ()")
+		log.Error(err)
+		return
+	}
+	// add brackets
+	functionString = strings.TrimSpace(strings.SplitN(functionString, "(", 2)[1])
+	functionString = "[" + functionString[:len(functionString)-1] + "]"
 
+	var values []interface{}
+	err = json.Unmarshal([]byte(functionString), &values)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	if len(values) != len(paramNames) {
+		err = fmt.Errorf("number of values and param names not equal")
+		log.Error(err)
+		return
+	}
+
+	// build JSON string
+	jsonString := ""
+	for i, value := range values {
+		var valueByte []byte
+		valueByte, err = json.Marshal(value)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+		jsonString += `"` + paramNames[i] + `": ` + string(valueByte)
+		if i < len(values)-1 {
+			jsonString += ", "
+		}
+	}
+
+	jsonString = "{" + jsonString + "}"
+	jsonBytes = []byte(jsonString)
 	return
 }
 
@@ -77,7 +116,7 @@ func FindFunction(importPath string, functionName string) (structString string, 
 	return
 }
 
-func findFunctionInFile(fname string, functionName string) (packageName string, inputParams []Param, outputParams []Param, err error) {
+func FindFunctionInFile(fname string, functionName string) (packageName string, inputParams []Param, outputParams []Param, err error) {
 	// read file
 	b, err := ioutil.ReadFile(fname)
 	if err != nil {
