@@ -3,11 +3,17 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/schollz/faas/pkg/gofaas"
 	log "github.com/schollz/logger"
+
+	// start generated code
+	"github.com/schollz/ingredients"
+	// end generated code
 )
 
 func main() {
@@ -30,16 +36,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		log.Infof("%s?%s %s", r.URL.Path, r.URL.RawQuery, time.Since(timeStart))
 	}()
 
-	var response []byte
-	var err error
-	if r.Method == "POST" {
-		response, err = handlePost(w, r)
-	} else if r.Method == "GET" {
-
-	} else if r.Method == "OPTION" {
-		response = []byte("ok")
-	}
-
+	response, err := handle(w, r)
 	if err != nil {
 		res := struct {
 			Message string `json:"message"`
@@ -60,13 +57,67 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func handlePost(w http.ResponseWriter, r *http.Request) (reponse []byte, err error) {
-	// decoder := json.NewDecoder(r.Body)
-	// err = decoder.Decode(&t)
-	// if err != nil {
-	// 	log.Error(err)
-	// 	return
-	// }
+// start generated code
+const functionNameToRun = "NewFromURL"
 
+var paramNames = []string{"url"}
+
+type Input struct {
+	Url string `json:"url"`
+}
+
+// end generated code
+
+func handle(w http.ResponseWriter, r *http.Request) (response []byte, err error) {
+	funcString, ok := r.URL.Query()["func"]
+	if !ok {
+		err = fmt.Errorf("no func string")
+		log.Error(err)
+		return
+	}
+
+	log.Debug(funcString)
+	functionName, jsonBytes, err := gofaas.ParseFunctionString(paramNames, funcString[0])
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	if functionNameToRun != functionName {
+		err = fmt.Errorf("mismatched functions")
+		log.Error(err)
+		return
+	}
+
+	var input Input
+	err = json.Unmarshal(jsonBytes, &input)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	// start generated code
+	out1, out2 := ingredients.NewFromURL(input.Url)
+	var b []byte
+	responseString := ""
+
+	b, err = json.Marshal(out1)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	responseString += `"` + "r" + `"` + ": " + string(b)
+
+	responseString += ","
+	b, err = json.Marshal(out2)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	responseString += `"` + "err" + `"` + ": " + string(b)
+	// end generated code
+
+	responseString = "{" + responseString + "}"
+	response = []byte(responseString)
 	return
 }

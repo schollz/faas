@@ -39,6 +39,7 @@ func TestFindFunctionInImportPath(t *testing.T) {
 func TestUpdateTypeWithPackage(t *testing.T) {
 	assert.Equal(t, "[]*ingredients.Recipe", UpdateTypeWithPackage("ingredients", "[]*Recipe"))
 	assert.Equal(t, "int32", UpdateTypeWithPackage("ingredients", "int32"))
+	assert.Equal(t, "models.Param", UpdateTypeWithPackage("ingredients", "models.Param"))
 }
 
 // func TestCodeGeneration(t *testing.T) {

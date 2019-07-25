@@ -247,6 +247,10 @@ var types = []string{"string", "bool", "byte", "int8", "uint8", "int16", "uint16
 
 func UpdateTypeWithPackage(packageName string, typeString string) (newTypeString string) {
 	newTypeString = typeString
+	if strings.Contains(typeString, ".") {
+		// don't handle the other types yet
+		return
+	}
 	isarray := typeString[:2] == "[]"
 	if isarray {
 		typeString = typeString[2:]

@@ -12,6 +12,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/schollz/googleit v1.5.0 h1:Zuc8BkflIbPjUomAbqsdZV93idxvulQi1ag7F2tA1Pk=
 github.com/schollz/googleit v1.5.0/go.mod h1:TkfotJdD828XU+kJhK/RmoLXPdyS/EPjy23EiIMqvbk=
+github.com/schollz/ingredients v1.0.1 h1:lfp6TqlUXbfxLLUB0Dfr9IctsJcVgIb+pjJN2ATXhbI=
+github.com/schollz/ingredients v1.0.1/go.mod h1:L87JcAeoYikP9s/bO3FPgh3PW9D6Q/Wi+Eqjm/66oPQ=
 github.com/schollz/logger v1.0.1 h1:BuBAU+euqphM0Ny9qFVScl4RSxatis4nCHIkOxO2cUU=
 github.com/schollz/logger v1.0.1/go.mod h1:P6F4/dGMGcx8wh+kG1zrNEd4vnNpEBY/mwEMd/vn6AM=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
