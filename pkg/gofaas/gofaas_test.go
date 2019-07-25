@@ -1,12 +1,7 @@
 package gofaas
 
 import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
-	"strings"
 	"testing"
-	"text/template"
 
 	log "github.com/schollz/logger"
 	"github.com/stretchr/testify/assert"
@@ -47,36 +42,7 @@ func TestUpdateTypeWithPackage(t *testing.T) {
 	assert.Equal(t, "models.Param", UpdateTypeWithPackage("ingredients", "models.Param"))
 }
 
-func TestCodeGeneration(t *testing.T) {
-	type CodeGen struct {
-		ImportPath   string
-		PackageName  string
-		FunctionName string
-		InputParams  []Param
-		OutputParams []Param
-	}
-	b, _ := ioutil.ReadFile("template/main.go")
-	funcMap := template.FuncMap{
-		"title": strings.Title,
-	}
-	tmpl, err := template.New("titleTest").Funcs(funcMap).Parse(string(b))
-	if err != nil {
-		log.Error(err)
-		return
-	}
-
-	var tpl bytes.Buffer
-	err = tmpl.Execute(&tpl, CodeGen{
-		ImportPath:   "github.com/schollz/ingredients",
-		PackageName:  "ingredients",
-		FunctionName: "NewFromURL",
-		InputParams:  []Param{Param{Name: "url", Type: "string"}},
-		OutputParams: []Param{Param{Name: "r", Type: "*ingredients.Recipe"}, Param{Name: "err", Type: "error"}},
-	})
+func TestBuildContainerFromImportpath(t *testing.T) {
+	err := BuildContainerFromImportpath("github.com/schollz/ingredients", "NewFromURL")
 	assert.Nil(t, err)
-
-	code := tpl.String()
-	fmt.Println(code)
-	ioutil.WriteFile("test/1.go", []byte(code), 0644)
-	assert.Nil(t, nil)
 }
