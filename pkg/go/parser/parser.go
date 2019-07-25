@@ -14,8 +14,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/schollz/faas/pkg/models"
-	"github.com/schollz/faas/pkg/utils"
+	"github.com/schollz/faas/pkg/go/models"
+	"github.com/schollz/faas/pkg/go/utils"
 	log "github.com/schollz/logger"
 )
 

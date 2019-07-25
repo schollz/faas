@@ -1,8 +1,14 @@
-
 // gen will generate new code
-package gen 
+package gen
 
+import (
+	"bytes"
+	"go/format"
+	"strings"
+	"text/template"
 
+	"github.com/schollz/faas/pkg/go/models"
+)
 
 func codeGeneration(packageName string, functionName string, inputParams []models.Param, outputParams []models.Param) (code string, err error) {
 

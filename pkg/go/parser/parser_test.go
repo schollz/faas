@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/schollz/faas/pkg/models"
+	"github.com/schollz/faas/pkg/go/models"
 	log "github.com/schollz/logger"
 	"github.com/stretchr/testify/assert"
 )
