@@ -43,19 +43,13 @@ func TestUpdateTypeWithPackage(t *testing.T) {
 	assert.Equal(t, "models.Param", UpdateTypeWithPackage("ingredients", "models.Param"))
 }
 
-func TestBuildContainerFromImportpath(t *testing.T) {
+func TestGenerateContainerFromImportPath(t *testing.T) {
 	os.Mkdir("test1", os.ModePerm)
-	err := BuildContainerFromImportpath("github.com/schollz/ingredients", "NewFromURL", "test1")
-	assert.Nil(t, err)
-}
-
-func TestGenerateContainerFromImportpath(t *testing.T) {
-	os.Mkdir("test1", os.ModePerm)
-	err := GenerateContainerFromImportpath("github.com/schollz/ingredients", "NewFromURL", "test1")
+	err := GenerateContainerFromImportPath("github.com/schollz/ingredients", "NewFromURL", "test1")
 	assert.Nil(t, err)
 }
 
 func TestBuildContainerFromImportPath(t *testing.T) {
-	err := BuildContainerFromImportPath("github.com/schollz/ingredients", "NewFromURL", "faas/1")
+	err := BuildContainerFromImportPath("github.com/schollz/ingredients", "NewFromURL", "faas-1")
 	assert.Nil(t, err)
 }

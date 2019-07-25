@@ -41,7 +41,13 @@ func BuildContainerFromImportPath(importPath string, functionName string, contai
 		log.Error(err)
 		return
 	}
-	defer os.RemoveAll(tempdir)
+	//defer os.RemoveAll(tempdir)
+
+	err = GenerateContainerFromImportPath(importPath, functionName, tempdir)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -51,15 +57,16 @@ func BuildContainerFromImportPath(importPath string, functionName string, contai
 	defer os.Chdir(cwd)
 	os.Chdir(tempdir)
 
-	// TODO: docker build
 	stdout, stderr, err := utils.RunCommand(fmt.Sprintf("docker build -t %s .", containerName))
 	log.Debugf("stdout: [%s]", stdout)
 	log.Debugf("stderr: [%s]", stderr)
-
+	if stderr != "" {
+		err = fmt.Errorf("%s\n%s", stdout, stderr)
+	}
 	return
 }
 
-func GenerateContainerFromImportpath(importPath string, functionName string, tempdir string) (err error) {
+func GenerateContainerFromImportPath(importPath string, functionName string, tempdir string) (err error) {
 	log.Debugf("building %s into %s", importPath, tempdir)
 
 	// build the template file
@@ -74,6 +81,9 @@ func GenerateContainerFromImportpath(importPath string, functionName string, tem
 	}
 
 	packageName, inputParams, outputParams, err := FindFunctionInImportPath(importPath, functionName)
+	log.Debugf("packageName: %+v", packageName)
+	log.Debugf("inputParams: %+v", inputParams)
+	log.Debugf("outputParams: %+v", outputParams)
 
 	var tpl bytes.Buffer
 	err = tmpl.Execute(&tpl, CodeGen{
@@ -311,10 +321,9 @@ const Dockerfile = `
 # 1. Build in a Go-based image   #
 ###################################
 FROM golang:1.12-alpine as builder
-RUN apk add --no-cache git curl
+RUN apk add git
 WORKDIR /go/main
 COPY . .
-RUN cp ./main.go main.go
 ENV GO111MODULE=on
 RUN go build -v
 
