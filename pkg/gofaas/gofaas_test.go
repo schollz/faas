@@ -1,6 +1,7 @@
 package gofaas
 
 import (
+	"os"
 	"testing"
 
 	log "github.com/schollz/logger"
@@ -43,6 +44,7 @@ func TestUpdateTypeWithPackage(t *testing.T) {
 }
 
 func TestBuildContainerFromImportpath(t *testing.T) {
-	err := BuildContainerFromImportpath("github.com/schollz/ingredients", "NewFromURL")
+	os.Mkdir("test1", os.ModePerm)
+	err := BuildContainerFromImportpath("github.com/schollz/ingredients", "NewFromURL", "test1")
 	assert.Nil(t, err)
 }

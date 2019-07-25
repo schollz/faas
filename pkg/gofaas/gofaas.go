@@ -34,15 +34,29 @@ type CodeGen struct {
 
 var ErrorFunctionNotFound = errors.New("function not found")
 
-func BuildContainerFromImportpath(importPath string, functionName string) (err error) {
+func BuildAndRunContainer(importPath string, functionName string) (err error) {
 	// create a temp directory
 	tempdir, err := ioutil.TempDir("", "build")
 	if err != nil {
 		log.Error(err)
 		return
 	}
+	defer os.RemoveAll(tempdir)
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	defer os.Chdir(cwd)
+	os.Chdir(tempdir)
+
+	// TODO: docker build
+	return
+}
+
+func BuildContainerFromImportpath(importPath string, functionName string, tempdir string) (err error) {
 	log.Debugf("building %s into %s", importPath, tempdir)
-	// defer os.RemoveAll(tempdir)
 
 	// build the template file
 	b, _ := ioutil.ReadFile("template/main.go")
@@ -88,6 +102,7 @@ func BuildContainerFromImportpath(importPath string, functionName string) (err e
 		log.Error(err)
 		return
 	}
+
 	return
 }
 
