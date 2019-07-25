@@ -16,6 +16,17 @@ import (
 	// end generated code
 )
 
+// start generated code
+const functionNameToRun = "NewFromURL"
+
+var paramNames = []string{"url"}
+
+type Input struct {
+	Url string `json:"url"`
+}
+
+// end generated code
+
 func main() {
 	var debug bool
 	flag.BoolVar(&debug, "debug", false, "debug mode")
@@ -38,21 +49,32 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	var response []byte
 	var err error
-
+	var input Input
+	bUsage, _ := json.Marshal(input)
+	response, _ = json.Marshal(struct {
+		Usage   string `json:"usage"`
+		Message string `json:"message"`
+		Success bool   `json:"success"`
+	}{
+		string(bUsage),
+		"usage",
+		true,
+	})
 	if r.Method == "GET" {
 		response, err = handleGet(w, r)
 	} else if r.Method == "POST" {
 		response, err = handlePost(w, r)
 	}
 	if err != nil {
-		res := struct {
+		response, _ = json.Marshal(struct {
+			Usage   string `json:"usage"`
 			Message string `json:"message"`
 			Success bool   `json:"success"`
 		}{
+			string(bUsage),
 			err.Error(),
 			false,
-		}
-		response, _ = json.Marshal(res)
+		})
 	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Max-Age", "86400")
@@ -64,22 +86,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-// start generated code
-const functionNameToRun = "NewFromURL"
-
-var paramNames = []string{"url"}
-
-type Input struct {
-	Url string `json:"url"`
-}
-
-// end generated code
-
 func handlePost(w http.ResponseWriter, r *http.Request) (response []byte, err error) {
-
+	decoder := json.NewDecoder(r.Body)
+	var input Input
+	err = decoder.Decode(&input)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	return getResponse(input)
 }
 
 func handleGet(w http.ResponseWriter, r *http.Request) (response []byte, err error) {
+	log.Debug(r.URL.RawQuery)
 	funcString, ok := r.URL.Query()["func"]
 	if !ok {
 		err = fmt.Errorf("no func string")
@@ -107,10 +126,10 @@ func handleGet(w http.ResponseWriter, r *http.Request) (response []byte, err err
 		return
 	}
 
-	return getReponse(input)
+	return getResponse(input)
 }
 
-func getReponse(input Input) (response []byte, err error) {
+func getResponse(input Input) (response []byte, err error) {
 	// start generated code
 	out1, out2 := ingredients.NewFromURL(input.Url)
 	var b []byte
