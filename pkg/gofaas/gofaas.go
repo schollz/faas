@@ -73,7 +73,7 @@ func ParseFunctionString(paramNames []string, functionString string) (functionNa
 	return
 }
 
-func FindFunction(importPath string, functionName string) (structString string, err error) {
+func FindFunctionInImportPath(importPath string, functionName string) (packageName string, inputParams []Param, outputParams []Param, err error) {
 	// create a temp directory
 	tempdir, err := ioutil.TempDir("", "parser")
 	if err != nil {
@@ -114,7 +114,19 @@ func FindFunction(importPath string, functionName string) (structString string, 
 	}
 	log.Debugf("found %d go files", len(goFiles))
 
-	// return the function
+	// loop through the files to find the function
+	for _, fname := range goFiles {
+		packageName, inputParams, outputParams, err = FindFunctionInFile(fname, functionName)
+		if err == nil {
+			for i := range inputParams {
+				inputParams[i].Type = UpdateTypeWithPackage(packageName, inputParams[i].Type)
+			}
+			for i := range inputParams {
+				outputParams[i].Type = UpdateTypeWithPackage(packageName, outputParams[i].Type)
+			}
+			return
+		}
+	}
 	return
 }
 
@@ -228,5 +240,38 @@ fullJson += "}"
 
 	codeBytes, err := format.Source(tpl.Bytes())
 	code = string(codeBytes)
+	return
+}
+
+var types = []string{"string", "bool", "byte", "int8", "uint8", "int16", "uint16", "int32", "uint32", "int64", "uint64", "int", "uint", "uintptr", "float32", "float64", "complex64", "complex128"}
+
+func UpdateTypeWithPackage(packageName string, typeString string) (newTypeString string) {
+	newTypeString = typeString
+	isarray := typeString[:2] == "[]"
+	if isarray {
+		typeString = typeString[2:]
+	}
+	ispointer := string(typeString[0]) == string("*")
+	if ispointer {
+		typeString = typeString[1:]
+	}
+	isnormal := false
+	for _, t := range types {
+		if typeString == t {
+			isnormal = true
+			break
+		}
+	}
+	if isnormal {
+		return newTypeString
+	}
+	newTypeString = ""
+	if isarray {
+		newTypeString += "[]"
+	}
+	if ispointer {
+		newTypeString += "*"
+	}
+	newTypeString += packageName + "." + typeString
 	return
 }
