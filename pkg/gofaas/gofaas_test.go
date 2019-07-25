@@ -1,7 +1,12 @@
 package gofaas
 
 import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"strings"
 	"testing"
+	"text/template"
 
 	log "github.com/schollz/logger"
 	"github.com/stretchr/testify/assert"
@@ -42,15 +47,35 @@ func TestUpdateTypeWithPackage(t *testing.T) {
 	assert.Equal(t, "models.Param", UpdateTypeWithPackage("ingredients", "models.Param"))
 }
 
-// func TestCodeGeneration(t *testing.T) {
-// 	packageName := "parser"
-// 	functionName := "FindFunction"
-// 	inputParams := []Param{Param{Name: "gitURL", Type: "string"}, Param{Name: "functionName", Type: "string"}}
-// 	outputParams := []Param{Param{Name: "structString", Type: "string"}, Param{Name: "err", Type: "error"}}
-// 	code, err := codeGeneration(packageName, functionName, inputParams, outputParams)
-// 	assert.Nil(t, err)
-// 	codeGood := "\ntype Input struct {\n\tGitURL       string `json:\"gitURL\"`\n\tFunctionName string `json:\"functionName\"`\n}\n\ntype Output struct {\n\tStructString string `json:\"structString\"`\n\tErr          error  `json:\"err\"`\n}\n\nvar params Input\nvar result Output\nerr = json.Unmarshal(b, &params)\nresult.StructString, result.Err = parser.FindFunction(\n\tparams.GitURL,\n\tparams.FunctionName,\n)\n\n"
-// 	assert.Equal(t, codeGood, code)
-// 	fmt.Println(codeGood)
-// 	fmt.Println(code)
-// }
+func TestCodeGeneration(t *testing.T) {
+	type CodeGen struct {
+		ImportPath   string
+		PackageName  string
+		FunctionName string
+		InputParams  []Param
+		OutputParams []Param
+	}
+	b, _ := ioutil.ReadFile("template/main.go")
+	funcMap := template.FuncMap{
+		"title": strings.Title,
+	}
+	tmpl, err := template.New("titleTest").Funcs(funcMap).Parse(string(b))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	var tpl bytes.Buffer
+	err = tmpl.Execute(&tpl, CodeGen{
+		ImportPath:   "github.com/schollz/ingredients",
+		PackageName:  "ingredients",
+		FunctionName: "NewFromURL",
+		InputParams:  []Param{Param{Name: "url", Type: "string"}},
+		OutputParams: []Param{Param{Name: "r", Type: "*ingredients.Recipe"}, Param{Name: "err", Type: "error"}},
+	})
+	assert.Nil(t, err)
+
+	code := tpl.String()
+	fmt.Println(code)
+	assert.Nil(t, nil)
+}
