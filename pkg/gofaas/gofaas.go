@@ -1,4 +1,4 @@
-package parser
+package gofaas
 
 import (
 	"bytes"
@@ -8,16 +8,20 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
-	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
-	"github.com/schollz/faas/pkg/go/models"
-	"github.com/schollz/faas/pkg/go/utils"
+	"github.com/schollz/faas/pkg/utils"
 	log "github.com/schollz/logger"
 )
+
+type Param struct {
+	Name string
+	Type string
+}
 
 var ErrorFunctionNotFound = errors.New("function not found")
 
@@ -66,7 +70,7 @@ func FindFunction(importPath string, functionName string) (structString string, 
 	return
 }
 
-func findFunctionInFile(fname string, functionName string) (packageName string, inputParams []models.Param, outputParams []models.Param, err error) {
+func findFunctionInFile(fname string, functionName string) (packageName string, inputParams []Param, outputParams []Param, err error) {
 	// read file
 	b, err := ioutil.ReadFile(fname)
 	if err != nil {
@@ -96,16 +100,16 @@ func findFunctionInFile(fname string, functionName string) (packageName string, 
 			}
 			// found function
 			err = nil
-			inputParams = make([]models.Param, len(fd.Type.Params.List))
+			inputParams = make([]Param, len(fd.Type.Params.List))
 			for i, param := range fd.Type.Params.List {
-				inputParams[i] = models.Param{
+				inputParams[i] = Param{
 					param.Names[0].Name,
 					src[param.Type.Pos()-offset : param.Type.End()-offset],
 				}
 			}
-			outputParams = make([]models.Param, len(fd.Type.Results.List))
+			outputParams = make([]Param, len(fd.Type.Results.List))
 			for i, param := range fd.Type.Results.List {
-				outputParams[i] = models.Param{
+				outputParams[i] = Param{
 					param.Names[0].Name,
 					src[param.Type.Pos()-offset : param.Type.End()-offset],
 				}
@@ -119,7 +123,7 @@ func findFunctionInFile(fname string, functionName string) (packageName string, 
 	return
 }
 
-func codeGeneration(packageName string, functionName string, inputParams []models.Param, outputParams []models.Param) (code string, err error) {
+func codeGeneration(packageName string, functionName string, inputParams []Param, outputParams []Param) (code string, err error) {
 
 	funcMap := template.FuncMap{
 		// The name "title" is what the function will be called in the template text.
@@ -155,8 +159,8 @@ fullJson += "}"
 
 	type TemplateStruct struct {
 		FunctionName string
-		InputParams  []models.Param
-		OutputParams []models.Param
+		InputParams  []Param
+		OutputParams []Param
 	}
 
 	tmpl, err := template.New("titleTest").Funcs(funcMap).Parse(templateText)
