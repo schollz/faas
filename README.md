@@ -33,8 +33,12 @@ For the `POST` requests the syntax is:
 
 with the body with the inputs `{"param":"value"}`.
 
-That's it! Because of how URLs are handled, . Also, the first time you run it will take ~1 minute while the Docker image is built.
+That's it! The first time you run it will take ~1 minute while the Docker image is built.
 
+
+## How does it work?
+
+When you make a `POST`/`GET` request to the `faas` server it will locate the given function and given package and it will generate a Docker container that accepts a JSON input with the parameters and outputs a JSON containing the output variables. This Docker container automatically shuts down after some time of inactivity. Subsequent requests then will load the previously built container for use.
 
 ## Host yourself
 
