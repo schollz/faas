@@ -205,8 +205,8 @@ func getOpenPort() (port string) {
 	for i := 7000; i < 9000; i++ {
 		port = strconv.Itoa(i)
 		ln, err := net.Listen("tcp", ":"+port)
-		ln.Close()
 		if err == nil {
+			ln.Close()
 			break
 		}
 	}
