@@ -1,5 +1,18 @@
 # faas
 
+## Try it
+
+You can make (almost) any exported Go function into a API using the syntax:
+
+```
+/?import=IMPORTPATH&func=FUNCNAME(...)
+```
+
+Because of how URLs are handled, you do need to URL encode the strings so that `FUNCNAME("hello, world") -> FUNCNAME(%22hello,%20world%22)`.
+
+- IngredientsFromURL: https://faas.schollz.com/?import=github.com/schollz/ingredients&func=IngredientsFromURL(%22https://cooking.nytimes.com/recipes/12320-apple-pie%22)
+- Md5Sum: https://faas.schollz.com/?import=github.com/schollz/utils&func=Md5Sum(%22hello,%20world%22)
+
 ## Get started
 
 You need to [install Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-engine---community-1), and make sure `gzip` is installed.
