@@ -304,9 +304,10 @@ func ParseFunctionString(paramNames []string, functionString string) (functionNa
 	return
 }
 
-var types = []string{"string", "bool", "byte", "int8", "uint8", "int16", "uint16", "int32", "uint32", "int64", "uint64", "int", "uint", "uintptr", "float32", "float64", "complex64", "complex128"}
+var types = []string{"error", "string", "bool", "byte", "int8", "uint8", "int16", "uint16", "int32", "uint32", "int64", "uint64", "int", "uint", "uintptr", "float32", "float64", "complex64", "complex128"}
 
 func UpdateTypeWithPackage(packageName string, typeString string) (newTypeString string) {
+	typeString = strings.TrimPrefix(typeString, "...")
 	newTypeString = typeString
 	if strings.Contains(typeString, ".") {
 		// don't handle the other types yet

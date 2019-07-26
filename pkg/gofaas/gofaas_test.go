@@ -37,6 +37,14 @@ func TestFindFunctionInImportPath(t *testing.T) {
 	assert.Equal(t, []Param{Param{Name: "r", Type: "*ingredients.Recipe"}, Param{Name: "err", Type: "error"}}, outputParams)
 }
 
+func TestFindFunctionInImportPath2(t *testing.T) {
+	packageName, inputParams, outputParams, err := FindFunctionInImportPath("github.com/schollz/googleit", "Search")
+	assert.Nil(t, err)
+	assert.Equal(t, "googleit", packageName)
+	assert.Equal(t, []Param{Param{Name: "query", Type: "string"}, Param{Name: "ops", Type: "googleit.Options"}}, inputParams)
+	assert.Equal(t, []Param{Param{Name: "urls", Type: "[]string"}, Param{Name: "err", Type: "error"}}, outputParams)
+}
+
 func TestUpdateTypeWithPackage(t *testing.T) {
 	assert.Equal(t, "[]*ingredients.Recipe", UpdateTypeWithPackage("ingredients", "[]*Recipe"))
 	assert.Equal(t, "int32", UpdateTypeWithPackage("ingredients", "int32"))
