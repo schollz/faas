@@ -165,7 +165,14 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) (err error) {
 
 	redirectURL := fmt.Sprintf("http://localhost:%s%s?%s", portFound, r.URL.Path, r.URL.RawQuery)
 	log.Debugf("getting data from %s", redirectURL)
-	resp, err := http.Get(redirectURL)
+	var resp *http.Response
+	if r.Method == "GET" {
+		resp, err = http.Get(redirectURL)
+	} else if r.Method == "POST" {
+		resp, err = http.Post(redirectURL, "application/json", r.Body)
+	} else {
+		err = fmt.Errorf("not implemented")
+	}
 	if err != nil {
 		log.Error(err)
 		return
