@@ -102,6 +102,10 @@ func GenerateContainerFromImportPath(importPath string, functionName string, tem
 	}
 
 	packageName, inputParams, outputParams, err := FindFunctionInImportPath(importPath, functionName)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 	log.Debugf("packageName: %+v", packageName)
 	log.Debugf("inputParams: %+v", inputParams)
 	log.Debugf("outputParams: %+v", outputParams)

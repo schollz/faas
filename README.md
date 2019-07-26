@@ -7,13 +7,16 @@ You need to [install Docker](https://docs.docker.com/install/linux/docker-ce/ubu
 Then install with Go:
 
 ```
-go get -v github.com/schollz/faas
+git clone https://github.com/schollz/faas
+cd faas
+go generate
+go build -v
 ```
 
 Now you can run:
 
 ```
-faas --debug
+./faas --debug
 ```
 
 Now you can try it out:
