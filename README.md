@@ -7,6 +7,7 @@ You can make (almost) any exported Go function into a API. Some examples:
 
 - IngredientsFromURL: https://faas.schollz.com/?import=github.com/schollz/ingredients&func=IngredientsFromURL(%22https://cooking.nytimes.com/recipes/12320-apple-pie%22)
 - Md5Sum: https://faas.schollz.com/?import=github.com/schollz/utils&func=Md5Sum(%22hello,%20world%22)
+- Googleit: `curl -d '{"query":"mint chocolate chip cookie recipe","ops":{"NumPages":3,"MustInclude":["chocolate","chip","cookie","mint"]}}' -H "Content-Type: application/json" -X POST https://faas.schollz.com/?import=github.com/schollz/googleit&func=Search`
 
 
 The syntax is simply:
