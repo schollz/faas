@@ -4,20 +4,25 @@
 
 You can make (almost) any exported Go function into a API using the syntax:
 
-```
-/?import=IMPORTPATH&func=FUNCNAME(...)
-```
-
-Because of how URLs are handled, you do need to URL encode the strings so that `FUNCNAME("hello, world") -> FUNCNAME(%22hello,%20world%22)`.
 
 - IngredientsFromURL: https://faas.schollz.com/?import=github.com/schollz/ingredients&func=IngredientsFromURL(%22https://cooking.nytimes.com/recipes/12320-apple-pie%22)
 - Md5Sum: https://faas.schollz.com/?import=github.com/schollz/utils&func=Md5Sum(%22hello,%20world%22)
 
-## Get started
+
+The syntax is simply:
+
+```
+/?import=IMPORTPATH&func=FUNCNAME(...)
+```
+
+That's it! Because of how URLs are handled, you do need to URL encode the strings so that `FUNCNAME("hello, world") -> FUNCNAME(%22hello,%20world%22)`. Also, the first time you run it will take ~1 minute while the Docker image is built.
+
+
+## Host yourself
 
 You need to [install Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-engine---community-1), and make sure `gzip` is installed.
 
-Then install with Go:
+Then build `faas` with Go:
 
 ```
 git clone https://github.com/schollz/faas
@@ -45,8 +50,6 @@ curl -d '{"s":"hello, world"}' -H "Content-Type: application/json" -X POST http:
 ```
 
 Note that the JSON `"s"` comes from the function `Md5Sum` itself.
-
-The first time you run it will take a minute to build the container, after which it will save the container and load after the container times out.
 
 ## License
 
