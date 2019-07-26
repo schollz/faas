@@ -1,9 +1,12 @@
 package main
 
+//go:generate cp -r pkg/gofaas/template .
+
 import (
 	"encoding/base32"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -133,6 +136,52 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) (err error) {
 			return
 		}
 	}
+
+	// its running, get port
+	stdout, stderr, err = utils.RunCommand("docker container ls")
+	log.Debugf("stdout: [%s]", stdout)
+	log.Debugf("stderr: [%s]", stderr)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	if stderr != "" {
+		err = fmt.Errorf("%s", stderr)
+		return
+	}
+	portFound := ""
+	for _, line := range strings.Split(stdout, "\n") {
+		if strings.Contains(line, id) {
+			portFound = utils.GetStringInBetween(line, "0.0.0.0:", "->")
+			break
+		}
+	}
+	if portFound == "" {
+		err = fmt.Errorf("no port found")
+		return
+	}
+
+	redirectURL := fmt.Sprintf("http://localhost:%s%s?%s", portFound, r.URL.Path, r.URL.RawQuery)
+	log.Debugf("getting data from %s", redirectURL)
+	resp, err := http.Get(redirectURL)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Max-Age", "86400")
+	w.Header().Set("Access-Control-Allow-Methods", "GET,POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Max")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Content-Type", "text/javascript")
+	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+	w.Write(body)
 	return
 }
 
