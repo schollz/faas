@@ -42,9 +42,9 @@ func main() {
 		startTime = time.Now()
 	go func() {
 		for {
-			time.Sleep(1 * time.Second)
-			log.Debugf("checking time: %2.1f > 10?", time.Since(startTime).Seconds())
-			if time.Since(startTime).Seconds() > 10 {
+			time.Sleep(10 * time.Second)
+			log.Debugf("checking time: %2.1f > 300?", time.Since(startTime).Seconds())
+			if time.Since(startTime).Seconds() > 300 {
 				os.Exit(0)
 			}
 		}

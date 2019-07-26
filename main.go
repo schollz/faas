@@ -28,6 +28,8 @@ type Server struct {
 
 func main() {
 	var debug bool
+	var port string
+	flag.StringVar(&port, "port", "8090", "port to run")
 	flag.BoolVar(&debug, "debug", false, "debug mode")
 	flag.Parse()
 	if debug {
@@ -40,9 +42,9 @@ func main() {
 	s := new(Server)
 	s.HashToPort = make(map[string]string)
 
-	log.Infof("running on port %s", "8080")
+	log.Infof("running on port %s", port)
 	http.HandleFunc("/", s.handler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+port, nil)
 }
 
 func (s *Server) handler(w http.ResponseWriter, r *http.Request) {
