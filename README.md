@@ -25,6 +25,14 @@ Now you can try it out:
 curl http://localhost:8090/?import=github.com/schollz/utils&func=Md5Sum(%22hello,%20world%22)
 ```
 
+OR post data:
+
+```
+curl -d '{"s":"hello, world"}' -H "Content-Type: application/json" -X POST http://localhost:8090/?import=github.com/schollz/utils&func=Md5Sum
+```
+
+Note that the JSON `"s"` comes from the function `Md5Sum` itself.
+
 The first time you run it will take a minute to build the container, after which it will save the container and load after the container times out.
 
 ## License
