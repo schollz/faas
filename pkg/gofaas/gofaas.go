@@ -41,7 +41,7 @@ func BuildContainerFromImportPath(importPath string, functionName string, contai
 		log.Error(err)
 		return
 	}
-	defer os.RemoveAll(tempdir)
+	// defer os.RemoveAll(tempdir)
 
 	err = GenerateContainerFromImportPath(importPath, functionName, tempdir)
 	if err != nil {
@@ -54,6 +54,9 @@ func BuildContainerFromImportPath(importPath string, functionName string, contai
 		log.Error(err)
 		return
 	}
+
+	imagesPath := path.Join(cwd, "images")
+
 	defer os.Chdir(cwd)
 	os.Chdir(tempdir)
 
@@ -62,7 +65,25 @@ func BuildContainerFromImportPath(importPath string, functionName string, contai
 	log.Debugf("stderr: [%s]", stderr)
 	if stderr != "" {
 		err = fmt.Errorf("%s\n%s", stdout, stderr)
+		return
 	}
+
+	stdout, stderr, err = utils.RunCommand(fmt.Sprintf("docker save %s -o %s", containerName, path.Join(imagesPath, containerName+".tar")))
+	log.Debugf("stdout: [%s]", stdout)
+	log.Debugf("stderr: [%s]", stderr)
+	if stderr != "" {
+		err = fmt.Errorf("%s\n%s", stdout, stderr)
+		return
+	}
+
+	stdout, stderr, err = utils.RunCommand(fmt.Sprintf("gzip %s", path.Join(imagesPath, containerName+".tar")))
+	log.Debugf("stdout: [%s]", stdout)
+	log.Debugf("stderr: [%s]", stderr)
+	if stderr != "" {
+		err = fmt.Errorf("%s\n%s", stdout, stderr)
+		return
+	}
+
 	return
 }
 

@@ -50,6 +50,13 @@ func TestGenerateContainerFromImportPath(t *testing.T) {
 }
 
 func TestBuildContainerFromImportPath(t *testing.T) {
+	os.Mkdir("images", os.ModePerm)
 	err := BuildContainerFromImportPath("github.com/schollz/ingredients", "NewFromURL", "faas-1")
+	assert.Nil(t, err)
+}
+
+func TestBuildContainerFromImportPath2(t *testing.T) {
+	os.Mkdir("images", os.ModePerm)
+	err := BuildContainerFromImportPath("github.com/schollz/utils", "Md5Sum", "faas-2")
 	assert.Nil(t, err)
 }

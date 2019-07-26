@@ -2,12 +2,23 @@ package utils
 
 import (
 	"bytes"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
 
 	log "github.com/schollz/logger"
 )
+
+// Exists reports whether the named file or directory exists.
+func Exists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
+}
 
 func RunCommand(commands string, commandDuration ...time.Duration) (string, string, error) {
 	tDuration := 100 * time.Hour

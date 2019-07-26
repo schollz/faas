@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"os"
 
 	"github.com/schollz/faas/pkg/gofaas"
 	log "github.com/schollz/logger"
 
 	// start generated code
 	"{{.ImportPath}}"
-	// "github.com/schollz/ingredients"
 	// end generated code
 )
 
@@ -25,15 +25,9 @@ type Input struct {
 	{{title .Name }} {{.Type }}  `json:"{{.Name}}"`{{end}}
 }
 const userCors = true
-
-// const functionNameToRun = "NewFromURL"
-// var paramNames = []string{"url"}
-// type Input struct {
-// 	Url string `json:"url"`
-// }
-// const userCors = true
-
 // end generated code
+var startTime time.Time
+
 
 func main() {
 	var debug bool
@@ -44,6 +38,17 @@ func main() {
 	} else {
 		log.SetLevel("info")
 	}
+
+		startTime = time.Now()
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			log.Debugf("checking time: %2.1f > 10?", time.Since(startTime).Seconds())
+			if time.Since(startTime).Seconds() > 10 {
+				os.Exit(0)
+			}
+		}
+	}()
 	log.Infof("running on port %s", "8080")
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":8080", nil)
@@ -154,24 +159,7 @@ func getResponse(input Input) (response []byte, err error) {
 	}
 	responseString += `"` + "{{$element.Name}}" + `"` + ": " + string(b)
 	{{end}}
-	// out1, out2 := ingredients.NewFromURL(input.Url)
-	// var b []byte
-	// responseString := ""
 
-	// b, err = json.Marshal(out1)
-	// if err != nil {
-	// 	log.Error(err)
-	// 	return
-	// }
-	// responseString += `"` + "r" + `"` + ": " + string(b)
-
-	// responseString += ","
-	// b, err = json.Marshal(out2)
-	// if err != nil {
-	// 	log.Error(err)
-	// 	return
-	// }
-	// responseString += `"` + "err" + `"` + ": " + string(b)
 	// end generated code
 
 	responseString = "{" + responseString + "}"
