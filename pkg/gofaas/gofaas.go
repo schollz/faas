@@ -41,7 +41,7 @@ func BuildContainerFromImportPath(importPath string, functionName string, contai
 		log.Error(err)
 		return
 	}
-	// defer os.RemoveAll(tempdir)
+	defer os.RemoveAll(tempdir)
 
 	err = GenerateContainerFromImportPath(importPath, functionName, tempdir)
 	if err != nil {
