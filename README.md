@@ -1,18 +1,22 @@
 # faas
 
-This is a FaaS - *functions as a service* but its more of a FaaSSS - *functions as a stupidly simple service*. It's [iron.io/functions](https://github.com/iron-io/functions), or [zeit/now](https://github.com/zeit/now-cli) or [openfaas](https://github.com/openfaas/faas) or [apex](https://github.com/apex/apex) or [sky-island](https://github.com/briandowns/sky-island) but more simple and more stupid. There is no coding, no init-ing, no pushing, no updating, no bumping. You Just make a HTTP request with the name of the package, the name of the function, and any input. Right now it only works for Go. You can make (almost) any exported Go function into a API using `GET` or `POST` queries.
+Make any (Go) function into an API with one HTTP request.
+
+This is a FaaS - *functions as a service* but its more of a FaaSSS - *functions as a stupidly simple service*. It's [iron.io/functions](https://github.com/iron-io/functions), or [zeit/now](https://github.com/zeit/now-cli) or [openfaas](https://github.com/openfaas/faas) or [apex](https://github.com/apex/apex) or [sky-island](https://github.com/briandowns/sky-island) but more simple and more stupid. There is no coding, no init-ing, no pushing, no updating, no bumping. You Just make a HTTP request with the name of the package, the name of the function, and any input. Right now it only works for Go. 
 
 
 ## Examples 
 
-IngredientsFromURL(url) from [schollz/ingredients](https://github.com/schollz/ingredients): [/?import=github.com/schollz/ingredients&func=IngredientsFromURL("https://cooking.nytimes.com/recipes/12320-apple-pie")](https://faas.schollz.com/?import=github.com/schollz/ingredients&func=IngredientsFromURL(%22https://cooking.nytimes.com/recipes/12320-apple-pie%22))
+You can make (almost) any exported Go function into a API using `GET` or `POST` queries!
 
 
-Md5Sum(s) from [schollz/utils](https://github.com/schollz/utils): [/?import=github.com/schollz/utils&func=Md5Sum("hello, world")](https://faas.schollz.com/?import=github.com/schollz/utils&func=Md5Sum(%22hello,%20world%22))
+Md5Sum from [schollz/utils](https://github.com/schollz/utils): [/?import=github.com/schollz/utils&func=Md5Sum("hello, world")](https://faas.schollz.com/?import=github.com/schollz/utils&func=Md5Sum(%22hello,%20world%22))
 
 
+IngredientsFromURL from [schollz/ingredients](https://github.com/schollz/ingredients): [/?import=github.com/schollz/ingredients&func=IngredientsFromURL("https://cooking.nytimes.com/recipes/12320-apple-pie")](https://faas.schollz.com/?import=github.com/schollz/ingredients&func=IngredientsFromURL(%22https://cooking.nytimes.com/recipes/12320-apple-pie%22))
 
-Search(url) from [schollz/googleit](https://github.com/schollz/googleit):
+
+Search from [schollz/googleit](https://github.com/schollz/googleit):
 
 ```
 $ curl -d '{"query":"mint chocolate chip cookie recipe","ops":{"NumPages":3,"MustInclude":["chocolate","chip","cookie","mint"]}}' \
