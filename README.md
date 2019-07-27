@@ -1,6 +1,6 @@
 # faas
 
-This is a FaaS - *functions as a service* but its more of a FaaSSS - *functions as a stupidly simple service*. It's [iron.io/functions](https://github.com/iron-io/functions), or [zeit/now](https://github.com/zeit/now-cli) or [openfaas](https://github.com/openfaas/faas) but more simple and more stupid. There is no coding, no init-ing, no pushing, no updating, no bumping. You Just make a HTTP request with the name of the package, the name of the function, and any input. Right now it only works for Go. You can make (almost) any exported Go function into a API using `GET` or `POST` queries.
+This is a FaaS - *functions as a service* but its more of a FaaSSS - *functions as a stupidly simple service*. It's [iron.io/functions](https://github.com/iron-io/functions), or [zeit/now](https://github.com/zeit/now-cli) or [openfaas](https://github.com/openfaas/faas) or [apex](https://github.com/apex/apex) or [sky-island](https://github.com/briandowns/sky-island) but more simple and more stupid. There is no coding, no init-ing, no pushing, no updating, no bumping. You Just make a HTTP request with the name of the package, the name of the function, and any input. Right now it only works for Go. You can make (almost) any exported Go function into a API using `GET` or `POST` queries.
 
 
 - IngredientsFromURL(url) from [schollz/ingredients](https://github.com/schollz/ingredients) :
