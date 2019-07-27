@@ -57,14 +57,20 @@ func TestGenerateContainerFromImportPath(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestBuildContainerFromImportPath(t *testing.T) {
+func TestBuildContainer(t *testing.T) {
 	os.Mkdir("images", os.ModePerm)
-	err := BuildContainerFromImportPath("github.com/schollz/ingredients", "NewFromURL", "faas-1")
+	err := BuildContainer("github.com/schollz/ingredients", "NewFromURL", "faas-1")
 	assert.Nil(t, err)
 }
 
-func TestBuildContainerFromImportPath2(t *testing.T) {
+func TestBuildContainer2(t *testing.T) {
 	os.Mkdir("images", os.ModePerm)
-	err := BuildContainerFromImportPath("github.com/schollz/utils", "Md5Sum", "faas-2")
+	err := BuildContainer("github.com/schollz/utils", "Md5Sum", "faas-2")
+	assert.Nil(t, err)
+}
+
+func TestGenerateContainerFromURL(t *testing.T) {
+	os.Mkdir("test2", os.ModePerm)
+	err := GenerateContainerFromURL("https://play.golang.org/p/9xzE8Ivwupk.go", "MarkdownToHTML", "test2")
 	assert.Nil(t, err)
 }

@@ -8,7 +8,9 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -34,7 +36,7 @@ type CodeGen struct {
 
 var ErrorFunctionNotFound = errors.New("function not found")
 
-func BuildContainerFromImportPath(importPath string, functionName string, containerName string) (err error) {
+func BuildContainer(importPathOrURL string, functionName string, containerName string) (err error) {
 	// create a temp directory
 	tempdir, err := ioutil.TempDir("", "build")
 	if err != nil {
@@ -43,12 +45,19 @@ func BuildContainerFromImportPath(importPath string, functionName string, contai
 	}
 	defer os.RemoveAll(tempdir)
 
-	err = GenerateContainerFromImportPath(importPath, functionName, tempdir)
-	if err != nil {
-		log.Error(err)
-		return
+	if strings.HasPrefix(importPathOrURL, "http") {
+		err = GenerateContainerFromURL(importPathOrURL, functionName, tempdir)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+	} else {
+		err = GenerateContainerFromImportPath(importPathOrURL, functionName, tempdir)
+		if err != nil {
+			log.Error(err)
+			return
+		}
 	}
-
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Error(err)
@@ -84,6 +93,88 @@ func BuildContainerFromImportPath(importPath string, functionName string, contai
 		return
 	}
 
+	return
+}
+
+func GenerateContainerFromURL(urlString string, functionName string, tempdir string) (err error) {
+	log.Debugf("building %s into %s", urlString, tempdir)
+	resp, err := http.Get(urlString)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	defer resp.Body.Close()
+	out, err := os.Create(path.Join(tempdir, "1.go"))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	defer out.Close()
+	io.Copy(out, resp.Body)
+
+	// build the template file
+	b, _ := ioutil.ReadFile("template/main.go")
+	funcMap := template.FuncMap{
+		"title": strings.Title,
+	}
+	tmpl, err := template.New("titleTest").Funcs(funcMap).Parse(string(b))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	packageName, inputParams, outputParams, err := FindFunctionInFile(path.Join(tempdir, "1.go"), functionName)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	log.Debugf("packageName: %+v", packageName)
+	log.Debugf("inputParams: %+v", inputParams)
+	log.Debugf("outputParams: %+v", outputParams)
+
+	var tpl bytes.Buffer
+	err = tmpl.Execute(&tpl, CodeGen{
+		ImportPath:   "",
+		PackageName:  "",
+		FunctionName: functionName,
+		InputParams:  inputParams,
+		OutputParams: outputParams,
+	})
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	b, err = ioutil.ReadFile(path.Join(tempdir, "1.go"))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	b = bytes.Replace(b, []byte("package "+packageName), []byte("package main"), 1)
+	err = ioutil.WriteFile(path.Join(tempdir, "1.go"), b, 0644)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	code := tpl.String()
+	err = ioutil.WriteFile(path.Join(tempdir, "main.go"), []byte(code), 0644)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	err = ioutil.WriteFile(path.Join(tempdir, "Dockerfile"), []byte(Dockerfile), 0644)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	err = ioutil.WriteFile(path.Join(tempdir, "go.mod"), []byte(`module main`), 0644)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 	return
 }
 
@@ -229,6 +320,7 @@ func FindFunctionInFile(fname string, functionName string) (packageName string, 
 			packageName = fd.Name.Name
 		}
 		if fd, ok := n.(*ast.FuncDecl); ok {
+			log.Debugf("found funnction: %s", fd.Name.Name)
 			if fd.Name.Name != functionName {
 				return true
 			}
@@ -236,6 +328,9 @@ func FindFunctionInFile(fname string, functionName string) (packageName string, 
 			err = nil
 			inputParams = make([]Param, len(fd.Type.Params.List))
 			for i, param := range fd.Type.Params.List {
+				if len(param.Names) == 0 {
+					continue
+				}
 				inputParams[i] = Param{
 					param.Names[0].Name,
 					src[param.Type.Pos()-offset : param.Type.End()-offset],
@@ -243,6 +338,9 @@ func FindFunctionInFile(fname string, functionName string) (packageName string, 
 			}
 			outputParams = make([]Param, len(fd.Type.Results.List))
 			for i, param := range fd.Type.Results.List {
+				if len(param.Names) == 0 {
+					continue
+				}
 				outputParams[i] = Param{
 					param.Names[0].Name,
 					src[param.Type.Pos()-offset : param.Type.End()-offset],

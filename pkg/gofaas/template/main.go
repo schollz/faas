@@ -13,7 +13,7 @@ import (
 	log "github.com/schollz/logger"
 
 	// start generated code
-	"{{.ImportPath}}"
+	{{with .ImportPath}}"{{.}}"{{end}}
 	// end generated code
 )
 
@@ -146,7 +146,7 @@ func handleGet(w http.ResponseWriter, r *http.Request) (response []byte, err err
 
 func getResponse(input Input) (response []byte, err error) {
 	// start generated code
-	{{range $index, $element := .OutputParams }}{{if $index}}, {{end}}out{{$index}}{{ end }} := {{.PackageName}}.{{.FunctionName}}({{range $index, $element := .InputParams }}{{if $index}}, {{end}}input.{{title $element.Name}}{{ end }})
+	{{range $index, $element := .OutputParams }}{{if $index}}, {{end}}out{{$index}}{{ end }} := {{with .PackageName}}{{.}}.{{end}}{{.FunctionName}}({{range $index, $element := .InputParams }}{{if $index}}, {{end}}input.{{title $element.Name}}{{ end }})
 	var b []byte
 	responseString := ""
 
@@ -157,7 +157,7 @@ func getResponse(input Input) (response []byte, err error) {
 		log.Error(err)
 		return
 	}
-	responseString += `"` + "{{$element.Name}}" + `"` + ": " + string(b)
+	responseString += `"` + "{{if $element.Name}}{{$element.Name}}{{else}}{{$index}}{{end}}" + `"` + ": " + string(b)
 	{{end}}
 
 	// end generated code

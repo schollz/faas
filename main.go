@@ -80,7 +80,7 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) (err error) {
 
 	if !utils.Exists(path.Join("images", id+".tar.gz")) {
 		log.Debugf("creating image for %s, %s()", importPath, funcString)
-		err = gofaas.BuildContainerFromImportPath(importPath, funcString, id)
+		err = gofaas.BuildContainer(importPath, funcString, id)
 		if err != nil {
 			log.Error(err)
 			return
