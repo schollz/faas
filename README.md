@@ -5,7 +5,7 @@ This is a FaaS - *functions as a service* but its more of a FaaSSS - *functions 
 
 ### Examples 
 
-IngredientsFromURL(url) from [schollz/ingredients](https://github.com/schollz/ingredients): [/?import=github.com/schollz/ingredients&func=IngredientsFromURL("https://cooking.nytimes.com/recipes/12320-apple-pie")](https://faas.schollz.com/?import=github.com/schollz/ingredients&func=IngredientsFromURL(%22https://cooking.nytimes.com/recipes/12320-apple-pie%22)
+IngredientsFromURL(url) from [schollz/ingredients](https://github.com/schollz/ingredients): [/?import=github.com/schollz/ingredients&func=IngredientsFromURL("https://cooking.nytimes.com/recipes/12320-apple-pie")](https://faas.schollz.com/?import=github.com/schollz/ingredients&func=IngredientsFromURL(%22https://cooking.nytimes.com/recipes/12320-apple-pie%22))
 
 
 Md5Sum(s) from [schollz/utils](https://github.com/schollz/utils): [/?import=github.com/schollz/utils&func=Md5Sum("hello, world")](https://faas.schollz.com/?import=github.com/schollz/utils&func=Md5Sum(%22hello,%20world%22))
