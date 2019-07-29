@@ -52,13 +52,26 @@ func (s *Server) handler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		log.Infof("%s?%s %s", r.URL.Path, r.URL.RawQuery, time.Since(timeStart))
 	}()
-	err := s.handle(w, r)
+	body, err := s.handle(w, r)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		body = []byte(`{"success":false,"err":"` + err.Error() + `"}`)
 	}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Max-Age", "86400")
+	w.Header().Set("Access-Control-Allow-Methods", "GET,POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Max")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+	w.Write(body)
 }
 
-func (s *Server) handle(w http.ResponseWriter, r *http.Request) (err error) {
+func (s *Server) handle(w http.ResponseWriter, r *http.Request) (body []byte, err error) {
+
+	if r.Method == "OPTIONS" {
+		w.Write([]byte("ok"))
+		return
+	}
 	fString, ok := r.URL.Query()["func"]
 	if !ok {
 		err = fmt.Errorf("no func string")
@@ -178,19 +191,11 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) (err error) {
 		return
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Max-Age", "86400")
-	w.Header().Set("Access-Control-Allow-Methods", "GET,POST")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Max")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Content-Type", "text/javascript")
-	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
-	w.Write(body)
 	return
 }
 
