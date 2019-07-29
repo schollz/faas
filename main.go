@@ -16,6 +16,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/muesli/cache2go"
 	"github.com/schollz/faas/pkg/gofaas"
 	"github.com/schollz/faas/pkg/utils"
 	log "github.com/schollz/logger"
@@ -42,28 +43,40 @@ func main() {
 	s := new(Server)
 	s.HashToPort = make(map[string]string)
 
-	log.Infof("running on port %s", port)
-	http.HandleFunc("/", s.handler)
-	http.ListenAndServe(":"+port, nil)
-}
+	cache := cache2go.Cache("faasCache")
 
-func (s *Server) handler(w http.ResponseWriter, r *http.Request) {
-	timeStart := time.Now()
-	defer func() {
-		log.Infof("%s?%s %s", r.URL.Path, r.URL.RawQuery, time.Since(timeStart))
-	}()
-	body, err := s.handle(w, r)
-	if err != nil {
-		body = []byte(`{"success":false,"err":"` + err.Error() + `"}`)
-	}
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Max-Age", "86400")
-	w.Header().Set("Access-Control-Allow-Methods", "GET,POST")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Max")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
-	w.Write(body)
+	log.Infof("running on port %s", port)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		timeStart := time.Now()
+		urlPath := fmt.Sprintf("%s?%s", r.URL.Path, r.URL.RawQuery)
+		defer func() {
+			log.Infof("%s?%s %s", r.URL.Path, r.URL.RawQuery, time.Since(timeStart))
+		}()
+		var body []byte
+		var err error
+
+		res, err := cache.Value(urlPath)
+		if err != nil {
+			body, err = s.handle(w, r)
+			if err != nil {
+				body = []byte(`{"success":false,"err":"` + err.Error() + `"}`)
+			}
+		} else {
+			body = res.Data().([]byte)
+		}
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Max-Age", "86400")
+		w.Header().Set("Access-Control-Allow-Methods", "GET,POST")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Max")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+		w.Write(body)
+		go func() {
+			cache.Add(urlPath, 30*time.Minute, body)
+		}()
+	})
+	http.ListenAndServe(":"+port, nil)
 }
 
 func (s *Server) handle(w http.ResponseWriter, r *http.Request) (body []byte, err error) {
