@@ -3,6 +3,7 @@ package main
 //go:generate cp -r pkg/gofaas/template .
 
 import (
+	"bytes"
 	"encoding/base32"
 	"flag"
 	"fmt"
@@ -55,6 +56,11 @@ func main() {
 		var body []byte
 		var err error
 
+		postBody, err := ioutil.ReadAll(r.Body)
+		if err == nil {
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(postBody))
+			urlPath += fmt.Sprintf("%s", postBody)
+		}
 		res, err := cache.Value(urlPath)
 		if err != nil {
 			body, err = s.handle(w, r)
