@@ -2,10 +2,15 @@
 
 Make any (Go) function into an API with one HTTP request.
 
-This is a FaaS - *functions as a service* but its more of a FaaSSS - *functions as a stupidly simple service*. It's [iron.io/functions](https://github.com/iron-io/functions), or [zeit/now](https://github.com/zeit/now-cli) or [openfaas](https://github.com/openfaas/faas) or [apex](https://github.com/apex/apex) or [sky-island](https://github.com/briandowns/sky-island) but more simple and more stupid. There is no coding, no init-ing, no pushing, no updating, no bumping. You Just make a HTTP request with the name of the package, the name of the function, and any input. Right now it only works for Go. 
+This is a FaaS: *functions as a service*. But, in actuality, its more of a FaaSSS: *functions as a stupidly simple service*. Imagine [iron.io/functions](https://github.com/iron-io/functions), or [zeit/now](https://github.com/zeit/now-cli) or [openfaas](https://github.com/openfaas/faas) or [apex](https://github.com/apex/apex) or [sky-island](https://github.com/briandowns/sky-island) but more simple and more stupid.
 
+Unlike others, this FaaS requires **no coding**, **no init-ing**, **no pushing**, **no updating**, and **no bumping**. You Just make *one* HTTP request with the name of the package, the name of the function, and any input. Right now it only works for Go. It can easily be extended to Python (WIP).
+
+The codebase is only about 600 lines of code in total. Basically a request tells the server to fetch the function, determine the inputs/outputs and write a wrapper function that is served from a Docker container.
 
 ## Examples 
+
+Try it right now with my instance at https://faas.schollz.com.
 
 You can make (almost) any exported Go function into a API! 
 
