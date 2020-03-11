@@ -96,7 +96,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Max")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 	}
+	{{ if eq 1 (len .OutputParams) }}
+	w.Header().Set("Content-Type", "text/plain")
+	{{else}}
 	w.Header().Set("Content-Type", "text/javascript")
+	{{end}}
 	w.Header().Set("Content-Length", strconv.Itoa(len(response)))
 	w.Write(response)
 }

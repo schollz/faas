@@ -69,6 +69,9 @@ func main() {
 			}
 		} else {
 			body = res.Data().([]byte)
+			go func() {
+				cache.Add(urlPath, 30*time.Minute, body)
+			}()
 		}
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Max-Age", "86400")
@@ -78,9 +81,6 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
 		w.Write(body)
-		go func() {
-			cache.Add(urlPath, 30*time.Minute, body)
-		}()
 	})
 	http.ListenAndServe(":"+port, nil)
 }
