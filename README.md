@@ -7,32 +7,34 @@ This is a FaaS - *functions as a service* but its more of a FaaSSS - *functions 
 
 ## Examples 
 
-You can make (almost) any exported Go function into a API using `GET` or `POST` queries!
+You can make (almost) any exported Go function into a API! 
 
+Run [`Md5Sum`](https://github.com/schollz/utils/blob/adaa47085f7b6b1c3e1ecfebfb18028e08e0bde2/hash.go#L29-L34) to get a md5 hash of "hello, world":
 
-Md5Sum from [schollz/utils](https://github.com/schollz/utils): [/?import=github.com/schollz/utils&func=Md5Sum("hello, world")](https://faas.schollz.com/?import=github.com/schollz/utils&func=Md5Sum(%22hello,%20world%22))
-
-
-IngredientsFromURL from [schollz/ingredients](https://github.com/schollz/ingredients): [/?import=github.com/schollz/ingredients&func=IngredientsFromURL("https://cooking.nytimes.com/recipes/12320-apple-pie")](https://faas.schollz.com/?import=github.com/schollz/ingredients&func=IngredientsFromURL(%22https://cooking.nytimes.com/recipes/12320-apple-pie%22))
-
-
-Search from [schollz/googleit](https://github.com/schollz/googleit):
-
-```
-$ curl -d '{"query":"mint chocolate chip cookie recipe","ops":{"NumPages":3,"MustInclude":["chocolate","chip","cookie","mint"]}}' \
-	-H "Content-Type: application/json" -X POST \
-	https://faas.schollz.com/?import=github.com/schollz/googleit&func=Search
+```bash
+$ curl https://faas.schollz.com/?import=github.com/schollz/utils&func=Md5Sum(%22hello,%20world%22)
+e4d7f1b4ed2e42d15898f4b27b019da4
 ```
 
-MarkdownToHTML from [Go playground](https://play.golang.org/p/9xzE8Ivwupk):
+Run [`IngredientsFromURL`](https://github.com/schollz/ingredients/blob/23a2a0c2d9dc8988c33acf7650ae9284a59d0b20/ingredients.go#L153-L160) to get the ingredients from any website:
 
+```bash
+$ curl https://faas.schollz.com/?import=github.com/schollz/ingredients&func=IngredientsFromURL(%22https://cooking.nytimes.com/recipes/12320-apple-pie%22)
+{"ingredients": [{"name":"butter","comment":"unsalted","measure":{"amount":2,"name":"tablespoons","cups":0.25}},{"name":"apples","measure":{"amount":2.5,"name":"pounds","cups":14.901182654402104}},{"name":"allspice","comment":"ground","measure":{"amount":0.25,"name":"teaspoon","cups":0.0104165}},{"name":"cinnamon","comment":"ground","measure":{"amount":0.5,"name":"teaspoon","cups":0.020833}},{"name":"salt","comment":"kosher","measure":{"amount":0.25,"name":"teaspoon","cups":0.0104165}},{"name":"sugar","comment":"plus 1 tablespoon","measure":{"amount":0.75,"name":"cup","cups":1.5}},{"name":"flour","comment":"all purpose","measure":{"amount":2,"name":"tablespoons","cups":0.25}},{"name":"cornstarch","measure":{"amount":2,"name":"teaspoons","cups":0.083332}},{"name":"apple cider vinegar","measure":{"amount":1,"name":"tablespoon","cups":0.125}},{"name":"pie dough","measure":{"amount":1,"name":"whole","cups":0}},{"name":"egg","measure":{"amount":1,"name":"whole","cups":0}}],"err": null
 ```
+
+Run `MarkdownToHTML` from a [Go playground](https://play.golang.org/p/9xzE8Ivwupk):
+
+```bash
 $ curl -d '{"markdown":"*hello*,**world**"}' \
  	-H "Content-Type: application/json" -X POST \
  	https://faas.schollz.com/?import=https://play.golang.org/p/9xzE8Ivwupk.go&func=MarkdownToHTML
+<p><em>hello</em>,<strong>world</strong></p>
 ```
 
 ## Usage 
+
+You can use `GET` or `POST` to submit jobs.
 
 For the `GET` requests the syntax is
 

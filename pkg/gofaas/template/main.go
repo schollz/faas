@@ -147,9 +147,15 @@ func handleGet(w http.ResponseWriter, r *http.Request) (response []byte, err err
 func getResponse(input Input) (response []byte, err error) {
 	// start generated code
 	{{range $index, $element := .OutputParams }}{{if $index}}, {{end}}out{{$index}}{{ end }} := {{with .PackageName}}{{.}}.{{end}}{{.FunctionName}}({{range $index, $element := .InputParams }}{{if $index}}, {{end}}input.{{title $element.Name}}{{ end }})
+
+// if only one output parm, then just marshal it and print it
+{{ if eq 1 (len .OutputParams) }}
+	{{range $index, $element := .OutputParams }}
+response= []byte(fmt.Sprintf("%+v",(out{{$index}})))
+	{{end}}
+{{else }}
 	var b []byte
 	responseString := ""
-
 	{{range $index, $element := .OutputParams }}
 	{{if $index}}responseString += ","{{end}}
 	b, err = json.Marshal(out{{$index}})
@@ -159,10 +165,10 @@ func getResponse(input Input) (response []byte, err error) {
 	}
 	responseString += `"` + "{{if $element.Name}}{{$element.Name}}{{else}}{{$index}}{{end}}" + `"` + ": " + string(b)
 	{{end}}
-
-	// end generated code
-
 	responseString = "{" + responseString + "}"
 	response = []byte(responseString)
+{{end}}
+	// end generated code
+
 	return
 }

@@ -43,7 +43,10 @@ func BuildContainer(importPathOrURL string, functionName string, containerName s
 		log.Error(err)
 		return
 	}
-	defer os.RemoveAll(tempdir)
+	if log.GetLevel() != "debug" {
+		defer os.RemoveAll(tempdir)
+	}
+	log.Debugf("working in %s", tempdir)
 
 	if strings.HasPrefix(importPathOrURL, "http") {
 		err = GenerateContainerFromURL(importPathOrURL, functionName, tempdir)
@@ -104,6 +107,7 @@ func GenerateContainerFromURL(urlString string, functionName string, tempdir str
 		return
 	}
 	defer resp.Body.Close()
+
 	out, err := os.Create(path.Join(tempdir, "1.go"))
 	if err != nil {
 		log.Error(err)
@@ -245,7 +249,6 @@ func FindFunctionInImportPath(importPath string, functionName string) (packageNa
 		log.Error(err)
 		return
 	}
-	log.Debugf("cloning %s into %s", importPath, tempdir)
 	defer os.RemoveAll(tempdir)
 
 	// clone into temp directory
@@ -444,7 +447,7 @@ const Dockerfile = `
 ##################################
 # 1. Build in a Go-based image   #
 ###################################
-FROM golang:1.12-alpine as builder
+FROM golang:1.14-alpine as builder
 RUN apk add git
 WORKDIR /go/main
 COPY . .
