@@ -50,9 +50,21 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		timeStart := time.Now()
 		urlPath := fmt.Sprintf("%s?%s", r.URL.Path, r.URL.RawQuery)
+		log.Infof("%s?%s %s", r.URL.Path, r.URL.RawQuery, time.Since(timeStart))
 		defer func() {
 			log.Infof("%s?%s %s", r.URL.Path, r.URL.RawQuery, time.Since(timeStart))
 		}()
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Max-Age", "86400")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "OPTIONS" {
+			return
+		}
+
 		var body []byte
 		var err error
 
@@ -73,12 +85,6 @@ func main() {
 				cache.Add(urlPath, 30*time.Minute, body)
 			}()
 		}
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Max-Age", "86400")
-		w.Header().Set("Access-Control-Allow-Methods", "GET,POST")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Max")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
 		w.Write(body)
 	})

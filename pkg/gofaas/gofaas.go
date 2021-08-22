@@ -117,7 +117,11 @@ func GenerateContainerFromURL(urlString string, functionName string, tempdir str
 	io.Copy(out, resp.Body)
 
 	// build the template file
-	b, _ := ioutil.ReadFile("template/main.go")
+	b, err := ioutil.ReadFile("template/main.go")
+	if err != nil {
+		log.Error(err)
+		return
+	}
 	funcMap := template.FuncMap{
 		"title": strings.Title,
 	}
@@ -160,8 +164,9 @@ func GenerateContainerFromURL(urlString string, functionName string, tempdir str
 		log.Error(err)
 		return
 	}
-
 	code := tpl.String()
+	log.Debugf("code: %s", code)
+
 	err = ioutil.WriteFile(path.Join(tempdir, "main.go"), []byte(code), 0644)
 	if err != nil {
 		log.Error(err)
@@ -186,7 +191,11 @@ func GenerateContainerFromImportPath(importPath string, functionName string, tem
 	log.Debugf("building %s into %s", importPath, tempdir)
 
 	// build the template file
-	b, _ := ioutil.ReadFile("template/main.go")
+	b, err := ioutil.ReadFile("template/main.go")
+	if err != nil {
+		log.Error(err)
+		return
+	}
 	funcMap := template.FuncMap{
 		"title": strings.Title,
 	}
@@ -204,7 +213,8 @@ func GenerateContainerFromImportPath(importPath string, functionName string, tem
 	log.Debugf("packageName: %+v", packageName)
 	log.Debugf("inputParams: %+v", inputParams)
 	log.Debugf("outputParams: %+v", outputParams)
-
+	log.Debugf("importPath: %+v", importPath)
+	log.Debugf("functionName: %+v", functionName)
 	var tpl bytes.Buffer
 	err = tmpl.Execute(&tpl, CodeGen{
 		ImportPath:   importPath,
@@ -219,6 +229,7 @@ func GenerateContainerFromImportPath(importPath string, functionName string, tem
 	}
 
 	code := tpl.String()
+	log.Debugf("code: %s", code)
 	err = ioutil.WriteFile(path.Join(tempdir, "main.go"), []byte(code), 0644)
 	if err != nil {
 		log.Error(err)
