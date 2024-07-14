@@ -1,4 +1,4 @@
-# faas
+# faas (funciton-as-a-service)
 
 Make any (Go) function into an API with one HTTP request.
 
