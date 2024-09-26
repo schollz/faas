@@ -70,6 +70,8 @@ func BuildContainer(importPathOrURL string, functionName string, containerName s
 	imagesPath := path.Join(cwd, "images")
 
 	defer os.Chdir(cwd)
+	absCwd, _ := filepath.Abs(tempdir)
+	log.Tracef("cd into %s", absCwd)
 	os.Chdir(tempdir)
 
 	stdout, stderr, err := utils.RunCommand(fmt.Sprintf("docker build -t %s .", containerName))
@@ -458,7 +460,7 @@ const Dockerfile = `
 ##################################
 # 1. Build in a Go-based image   #
 ###################################
-FROM golang:1.14-alpine as builder
+FROM golang as builder
 RUN apk add git
 WORKDIR /go/main
 COPY . .
