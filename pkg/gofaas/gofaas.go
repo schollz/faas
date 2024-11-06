@@ -74,10 +74,10 @@ func BuildContainer(importPathOrURL string, functionName string, containerName s
 	log.Tracef("cd into %s", absCwd)
 	os.Chdir(tempdir)
 
-	stdout, stderr, err := utils.RunCommand(fmt.Sprintf("docker build -t %s .", containerName))
+	stdout, stderr, err := utils.RunCommand(fmt.Sprintf("docker build --progress=plain -t %s .", containerName))
 	log.Debugf("stdout: [%s]", stdout)
 	log.Debugf("stderr: [%s]", stderr)
-	if stderr != "" {
+	if err != nil {
 		err = fmt.Errorf("%s\n%s", stdout, stderr)
 		return
 	}
@@ -175,6 +175,7 @@ func GenerateContainerFromURL(urlString string, functionName string, tempdir str
 		return
 	}
 
+	log.Debugf("dockerfile:\n%s\n", Dockerfile)
 	err = ioutil.WriteFile(path.Join(tempdir, "Dockerfile"), []byte(Dockerfile), 0644)
 	if err != nil {
 		log.Error(err)
@@ -186,6 +187,8 @@ func GenerateContainerFromURL(urlString string, functionName string, tempdir str
 		log.Error(err)
 		return
 	}
+
+	log.Debugf("wrote to temp directory: %s", tempdir)
 	return
 }
 
@@ -460,11 +463,13 @@ const Dockerfile = `
 ##################################
 # 1. Build in a Go-based image   #
 ###################################
-FROM golang as builder
+FROM golang:alpine AS builder
 RUN apk add git
 WORKDIR /go/main
 COPY . .
 ENV GO111MODULE=on
+RUN go version
+RUN go mod tidy
 RUN go build -v
 
 ###################################
